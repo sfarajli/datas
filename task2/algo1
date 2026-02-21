@@ -1,12 +1,14 @@
 #!/bin/python
 
-def spiral():
+import sys
+
+def spiral(N, initial_direction=None, center=None):
     center, initial_direction =  _validate_sprial(N, initial_direction, center)
     return _spiral_impl_1(N, initial_direction, center)
 
-def _validate_sprial(N, initial_direction=None, center=None):
+def _validate_sprial(N, initial_direction, center):
     def die(msg):
-        sys.stderr.write(msg, "\n")
+        sys.stderr.write(f"{msg} \n")
         exit(1)
 
     if not isinstance(N, int) or N <= 0:
@@ -80,6 +82,7 @@ def _spiral_impl_1(N, initial_direction, center):
 
     matrix[x][y] = number # Fill the center
 
+    direction=initial_direction
     done = False
     while not done:
         repetition += 1
