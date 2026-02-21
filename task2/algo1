@@ -1,23 +1,26 @@
 #!/bin/python
 
 def spiral(N):
-    matrix = [[1] * N for _ in range(N)]
+    matrix = [[0] * N for _ in range(N)]
     x = y = (N - 1) // 2
     direction = (0, 1) # Right
     number = 1
     repetition = 0
+    matrix[x][y] = number # Fill center
 
-    while True:
+    done = False
+    while not done:
         repetition += 1
-        if (repetition + number > N * N):
-            break
 
         for _ in range(2):
             dx, dy = direction
             for _ in range(repetition):
+                number += 1
+                if (number > N * N):
+                    done = True
+                    break
                 x += dx
                 y += dy
-                number += 1
                 matrix[x][y] = number
 
             direction = (dy, -dx) # Clockwise turn
