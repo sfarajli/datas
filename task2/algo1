@@ -3,10 +3,10 @@
 def spiral(N):
     matrix = [[0] * N for _ in range(N)]
     x = y = (N - 1) // 2
-    direction = (0, 1) # Right
+    direction = (0, 1)    # Right
     number = 1
     repetition = 0
-    matrix[x][y] = number # Fill center
+    matrix[x][y] = number # Fill the center
 
     done = False
     while not done:
