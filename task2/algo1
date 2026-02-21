@@ -1,0 +1,25 @@
+#!/bin/python
+
+def spiral(N):
+    result = [[1] * N for _ in range(N)]
+    x = y = (N - 1) // 2
+    direction = (0, 1)
+    number = 1
+    repetition = 0
+
+    while number < N * N:
+        repetition += 1
+        for _ in range(2):
+            dx, dy = direction
+            for _ in range(repetition):
+                x += dx
+                y += dy
+                number += 1
+                if (number > N * N):
+                    break
+
+                result[x][y] = number
+
+            direction = (dy, -dx)
+
+    return result
