@@ -6,7 +6,7 @@ _np = None
 def spiral(N, initial_direction = None, center = None, use_numpy = False):
     global _np
     if use_numpy:
-        _validate_sprial(N, initial_direction, center, use_numpy)
+        _validate_spiral(N, initial_direction, center, use_numpy)
         if _np is None:
             import numpy as np
             _np = np
@@ -14,7 +14,7 @@ def spiral(N, initial_direction = None, center = None, use_numpy = False):
         i, j = _np.indices((N, N))
         return _spiral_impl_numpy(i, j, N)
 
-    center, parsed_initial_direction = _validate_sprial(N, initial_direction, center, use_numpy)
+    center, parsed_initial_direction = _validate_spiral(N, initial_direction, center, use_numpy)
     return _spiral_impl_plain(N, parsed_initial_direction, center)
 
 
@@ -65,7 +65,7 @@ def _validate_diagonal_sum(matrix, use_numpy):
     # Not used, included for consistent API
     return matrix
 
-def _validate_sprial(N, initial_direction, center, use_numpy):
+def _validate_spiral(N, initial_direction, center, use_numpy):
 
     if not isinstance(N, int) or N <= 0:
         _die(f"invalid N: expected positive integer, got {N!r}")
