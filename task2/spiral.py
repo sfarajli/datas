@@ -3,9 +3,17 @@
 import sys
 import numpy as np
 
-def spiral(N, initial_direction=None, center=None):
-    center, initial_direction =  _validate_sprial(N, initial_direction, center)
-    return _spiral_impl_numpy(N, initial_direction, center)
+def spiral(N, initial_direction = None, center = None, use_numpy = True):
+    pass
+
+def diagonal_sum(matrix, use_numpy = True):
+    pass
+
+def _validate_diagonal_sum(matrix, use_numpy = True):
+    pass
+
+def _diagonal_sum_impl_numpy(matrix):
+    pass
 
 def _validate_sprial(N, initial_direction, center):
     def die(msg):
@@ -103,18 +111,30 @@ def _spiral_impl_plain(N, initial_direction, center):
 
     return matrix
 
+def _spiral_impl_numpy(i, j, N):
+    center = N // 2
+    x = center - i
+    y = j - center
 
-# FIXME: Move checking into verify function
-# FIXME: Better error messages
-def _diagonal_sum(matrix):
-    if not isinstance(matrix, list):
-        die("not a matrix")
+    layer = np.maximum(np.abs(x), np.abs(y))
+    max_value = (2 * layer + 1) ** 2
 
-    N = len(matrix)
+    out = np.empty((N, N), dtype=np.int64)
 
-    if not all(isinstance(row, list) and len(row) == n for row in mat):
-        die("not a suquare matrix")
+    # Exclude with `& ~` for corners
+    right  = (x == layer)
+    bottom = (y == -layer) & ~right
+    left   = (x == -layer) & ~(right | bottom)
+    top    = (y == layer) & ~(right | bottom | left)
 
+    out[right]  = max_value[right]  -   (layer[right] - y[right])
+    out[bottom] = max_value[bottom] - 2*layer[bottom] - (layer[bottom] - x[bottom])
+    out[left]   = max_value[left]   - 4*layer[left]   - (y[left] + layer[left])
+    out[top]    = max_value[top]    - 6*layer[top]    - (x[top] + layer[top])
+
+    return out
+
+def _diagonal_sum_impl_plain(matrix):
     primary_sum = secondary_sum = 0
 
     for i in range(N):
