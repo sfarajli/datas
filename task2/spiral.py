@@ -10,10 +10,12 @@ def spiral(N, initial_direction = None, center = None, use_numpy = False):
         if _np is None:
             import numpy as np
             _np = np
-            return np.fromfunction(lambda i, j: _spiral_impl_numpy(i, j, N), (N, N))
 
-    center, direction = _validate_sprial(N, initial_direction, center, use_numpy)
-    return _spiral_impl_plain(N, initial_direction, center)
+        i, j = _np.indices((N, N))
+        return _spiral_impl_numpy(i, j, N)
+
+    center, parsed_initial_direction = _validate_sprial(N, initial_direction, center, use_numpy)
+    return _spiral_impl_plain(N, parsed_initial_direction, center)
 
 
 def diagonal_sum(matrix, use_numpy = False):
@@ -22,7 +24,7 @@ def diagonal_sum(matrix, use_numpy = False):
         if _np is None:
             import numpy as np
             _np = np
-            return _diagonal_sum_impl_numpy(_validate_diagonal_sum(matrix, use_numpy))
+        return _diagonal_sum_impl_numpy(_validate_diagonal_sum(matrix, use_numpy))
 
     _validate_diagonal_sum(matrix, use_numpy)
     return _diagonal_sum_impl_plain(matrix)
@@ -34,7 +36,7 @@ def _die(msg):
 def _validate_diagonal_sum(matrix, use_numpy):
     if use_numpy:
         try:
-            arr = np.asarray(matrix)
+            arr = _np.asarray(matrix)
         except Exception as e:
             _die(f"failed to convert to numpy array: {matrix!r}\nerror: {e}")
 
@@ -68,7 +70,10 @@ def _validate_sprial(N, initial_direction, center, use_numpy):
 
     if use_numpy:
         if N % 2 == 0:
-            _die(f"invalid N: numpy only supports is odd numbers (N={N})")
+            _die(f"invalid N: numpy only supports odd numbers (N={N})")
+        if center is not None or initial_direction is not None:
+            _die(f"cannot specify center or initial_direction in numpy implementation; \
+                 (center={center}, initial_direction={initial_direction}) ")
         return
 
     if N % 2 == 1 and center is not None:
@@ -139,7 +144,7 @@ def _spiral_impl_plain(N, initial_direction, center):
 
     matrix[x][y] = number # Fill the center
 
-    direction=initial_direction
+    direction = initial_direction
     done = False
     while not done:
         repetition += 1
@@ -164,10 +169,10 @@ def _spiral_impl_numpy(i, j, N):
     x = center - i
     y = j - center
 
-    layer = np.maximum(np.abs(x), np.abs(y))
+    layer = _np.maximum(_np.abs(x), _np.abs(y))
     max_value = (2 * layer + 1) ** 2
 
-    out = np.empty((N, N), dtype=np.int64)
+    out = _np.empty((N, N), dtype=_np.int64)
 
     # Exclude with `& ~` for corners
     right  = (x == layer)
@@ -183,13 +188,14 @@ def _spiral_impl_numpy(i, j, N):
     return out
 
 def _diagonal_sum_impl_plain(matrix):
+    N = len(matrix)
     primary_sum = secondary_sum = 0
 
     for i in range(N):
-        primary_sum = matrix[i][i]
-        secondary_sum = matrix[i][N - i - 1] # Minus 1 because array starts at 0 not 1
+        primary_sum += matrix[i][i]
+        secondary_sum += matrix[i][N - i - 1] # Minus 1 because array starts at 0 not 1
 
     return primary_sum, secondary_sum
 
 def _diagonal_sum_impl_numpy(matrix):
-    return np.trace(matrix), np.trace(np.fliplr(matrix))
+    return _np.trace(matrix), _np.trace(_np.fliplr(matrix))
