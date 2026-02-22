@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 
 import sys
 _np = None
@@ -26,12 +26,12 @@ def diagonal_sum(matrix, use_numpy = False):
             _np = np
         return _diagonal_sum_impl_numpy(_validate_diagonal_sum(matrix, use_numpy))
 
-    _validate_diagonal_sum(matrix, use_numpy)
+    _ = _validate_diagonal_sum(matrix, use_numpy)
     return _diagonal_sum_impl_plain(matrix)
 
 def _die(msg):
-    sys.stderr.write(f"{msg} \n")
-    exit(1)
+    sys.stderr.write(f"{msg}\n")
+    sys.exit(1)
 
 def _validate_diagonal_sum(matrix, use_numpy):
     if use_numpy:
@@ -62,6 +62,8 @@ def _validate_diagonal_sum(matrix, use_numpy):
     if not all(len(row) == N for row in matrix):
         _die("not a square matrix (rows must all have length N)")
 
+    # Not used, included for consistent API
+    return matrix
 
 def _validate_sprial(N, initial_direction, center, use_numpy):
 
@@ -72,10 +74,13 @@ def _validate_sprial(N, initial_direction, center, use_numpy):
         if N % 2 == 0:
             _die(f"invalid N: numpy only supports odd numbers (N={N})")
         if center is not None or initial_direction is not None:
-            _die(f"cannot specify center or initial_direction in numpy implementation; \
-                 (center={center}, initial_direction={initial_direction}) ")
+            _die(
+                "cannot specify center or initial_direction in numpy implementation; "
+                f"(center={center!r}, initial_direction={initial_direction!r})"
+            )
         return
 
+    # Default center value exists for odd N, but cannot be specified by user
     if N % 2 == 1 and center is not None:
         _die(f"invalid center: N is odd (N={N})")
 
