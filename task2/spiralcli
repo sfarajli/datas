@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+import argparse
+from spiral import spiral, diagonal_sum
+
+def print_matrix(matrix):
+    width = len(str(max(max(row) for row in matrix)))
+    for row in matrix:
+        for value in row:
+            print(f"{value:>{width}}", end=" ")
+        print()
+
+parser = argparse.ArgumentParser(prog="spiralctl")
+
+parser.add_argument("--use-numpy", action="store_true")
+parser.add_argument("--get-diagonal", action="store_true")
+
+g = parser.add_mutually_exclusive_group()
+g.add_argument("--center", choices=["top-left", "top-right", "bottom-left", "bottom-right"])
+g.add_argument("--dir", choices=["right", "down", "left", "up"], dest="initial_direction")
+
+parser.add_argument("number", type=int)
+
+args = parser.parse_args()
+
+if args.number <= 0:
+    parser.error("number must be > 0")
+
+matrix = spiral(
+    args.number,
+    initial_direction=args.initial_direction,
+    center=args.center,
+    use_numpy=args.use_numpy,
+)
+
+print_matrix(matrix)
+
+if args.get_diagonal:
+    primary_sum, secondary_sum = diagonal_sum(matrix, use_numpy=args.use_numpy)
+    print(f"primary_sum = {primary_sum}, secondary_sum = {secondary_sum}")
