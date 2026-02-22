@@ -1,33 +1,81 @@
 #!/bin/python
 
 import sys
-import numpy as np
+_np = None
 
-def spiral(N, initial_direction = None, center = None, use_numpy = True):
-    pass
+def spiral(N, initial_direction = None, center = None, use_numpy = False):
+    global _np
+    if use_numpy:
+        _validate_sprial(N, initial_direction, center, use_numpy)
+        if _np is None:
+            import numpy as np
+            _np = np
+            return np.fromfunction(lambda i, j: _spiral_impl_numpy(i, j, N), (N, N))
 
-def diagonal_sum(matrix, use_numpy = True):
-    pass
+    center, direction = _validate_sprial(N, initial_direction, center, use_numpy)
+    return _spiral_impl_plain(N, initial_direction, center)
 
-def _validate_diagonal_sum(matrix, use_numpy = True):
-    pass
 
-def _diagonal_sum_impl_numpy(matrix):
-    pass
+def diagonal_sum(matrix, use_numpy = False):
+    global _np
+    if use_numpy:
+        if _np is None:
+            import numpy as np
+            _np = np
+            return _diagonal_sum_impl_numpy(_validate_diagonal_sum(matrix, use_numpy))
 
-def _validate_sprial(N, initial_direction, center):
-    def die(msg):
-        sys.stderr.write(f"{msg} \n")
-        exit(1)
+    _validate_diagonal_sum(matrix, use_numpy)
+    return _diagonal_sum_impl_plain(matrix)
+
+def _die(msg):
+    sys.stderr.write(f"{msg} \n")
+    exit(1)
+
+def _validate_diagonal_sum(matrix, use_numpy):
+    if use_numpy:
+        try:
+            arr = np.asarray(matrix)
+        except Exception as e:
+            _die(f"failed to convert to numpy array: {matrix!r}\nerror: {e}")
+
+        if arr.ndim != 2:
+            _die(f"not a 2D matrix (ndim={arr.ndim})")
+
+        n_rows, n_cols = arr.shape
+        if n_rows != n_cols:
+            _die(f"not a square matrix (shape={arr.shape})")
+
+        return arr
+
+    if not isinstance(matrix, list):
+        _die("not a matrix (expected list of rows)")
+
+    N = len(matrix)
+    if N == 0:
+        _die("not a square matrix (empty)")
+
+    if not all(isinstance(row, list) for row in matrix):
+        _die("not a matrix (each row must be a list)")
+
+    if not all(len(row) == N for row in matrix):
+        _die("not a square matrix (rows must all have length N)")
+
+
+def _validate_sprial(N, initial_direction, center, use_numpy):
 
     if not isinstance(N, int) or N <= 0:
-        die(f"invalid N: expected positive integer, got {N!r}")
+        _die(f"invalid N: expected positive integer, got {N!r}")
+
+    if use_numpy:
+        if N % 2 == 0:
+            _die(f"invalid N: numpy only supports is odd numbers (N={N})")
+        return
 
     if N % 2 == 1 and center is not None:
-        die(f"center is invalid when N is odd (N={N})")
+        _die(f"invalid center: N is odd (N={N})")
 
     if initial_direction is not None and center is not None:
-        die(
+        _die(
             f"initial_direction and center cannot both be specified "
             f"(initial_direction={initial_direction!r}, center={center!r})"
         )
@@ -61,19 +109,19 @@ def _validate_sprial(N, initial_direction, center):
             try:
                 initial_direction = center_to_dir[center]
             except KeyError:
-                die(f"invalid center: {center!r}")
+                _die(f"invalid center: {center!r}")
         else:
             # initial_direction is not None here (due to defaults / mutual exclusion)
             try:
                 center = dir_to_center[initial_direction]
             except KeyError:
-                die(f"invalid initial_direction: {initial_direction!r}")
+                _die(f"invalid initial_direction: {initial_direction!r}")
 
     try:
         direction = dir_to_step[initial_direction]
     except KeyError:
         # Unreachable
-        die(f"invalid initial_direction: {initial_direction!r}")
+        _die(f"invalid initial_direction: {initial_direction!r}")
 
     return center, direction
 
@@ -142,3 +190,6 @@ def _diagonal_sum_impl_plain(matrix):
         secondary_sum = matrix[i][N - i - 1] # Minus 1 because array starts at 0 not 1
 
     return primary_sum, secondary_sum
+
+def _diagonal_sum_impl_numpy(matrix):
+    return np.trace(matrix), np.trace(np.fliplr(matrix))
